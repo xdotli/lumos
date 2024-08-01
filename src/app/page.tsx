@@ -1,58 +1,78 @@
-'use client';
+import { Suspense } from 'react';
+import { getCompanyEvents, type Event } from './actions';
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { type CoreMessage } from 'ai';
-import { useState } from 'react';
-import { continueConversation } from './actions';
-import { readStreamableValue } from 'ai/rsc';
+async function EventsTable({ ticker }: { ticker: string }) {
+  const events = await getCompanyEvents(ticker);
 
-export const maxDuration = 30;
+  if (events.length === 0) {
+    return <p>No events found.</p>;
+  }
 
-export default function Chat() {
-  const [messages, setMessages] = useState<CoreMessage[]>([]);
-  const [input, setInput] = useState('');
-  const [data, setData] = useState<any>();
+  // if (events) {
+  //   return JSON.stringify(events);
+  // }
+
   return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
-      {messages.map((m, i) => (
-        <div key={i} className="whitespace-pre-wrap">
-          {m.role === 'user' ? 'User: ' : 'AI: '}
-          {m.content as string}
-        </div>
-      ))}
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Event Name</TableHead>
+          <TableHead>Link</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Time</TableHead>
+          <TableHead>Event Type</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {events.map((event: Event, index: number) => (
+          <TableRow key={index}>
+            <TableCell>{event.eventName}</TableCell>
+            <TableCell><a href={event.link} target="_blank" rel="noopener noreferrer">Link</a></TableCell>
+            <TableCell>{event.date}</TableCell>
+            <TableCell>{event.time}</TableCell>
+            <TableCell>{event.eventType}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
 
-      <form
-        onSubmit={async e => {
-          e.preventDefault();
-          const newMessages: CoreMessage[] = [
-            ...messages,
-            { content: input, role: 'user' },
-          ];
+export default function InvestorRelationsApp({
+  searchParams
+}: {
+  searchParams: { ticker?: string }
+}) {
+  const ticker = searchParams.ticker ?? '';
 
-          setMessages(newMessages);
-          setInput('');
+  return (
+    <Card className="w-full max-w-4xl mx-auto mt-10">
+      <CardHeader>
+        <CardTitle>Investor Relations Webcasts Finder</CardTitle>
+        <CardDescription>Enter a ticker to find upcoming and past webcasts</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form action="/" className="flex space-x-2 mb-4">
+          <Input
+            type="text"
+            name="ticker"
+            defaultValue={ticker}
+            placeholder="Enter ticker (e.g., MSFT)"
+            className="flex-grow"
+          />
+          <Button type="submit">Search</Button>
+        </form>
 
-          const result = await continueConversation(newMessages);
-          setData(result.data);
-
-          for await (const content of readStreamableValue(result.message)) {
-            setMessages([
-              ...newMessages,
-              {
-                role: 'assistant',
-                content: content!,
-              },
-            ]);
-          }
-        }}
-      >
-        <input
-          className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
-          value={input}
-          placeholder="Say something..."
-          onChange={e => setInput(e.target.value)}
-        />
-      </form>
-    </div>
+        {ticker && (
+          <Suspense fallback={<p>Loading...</p>}>
+            <EventsTable ticker={ticker} />
+          </Suspense>
+        )}
+      </CardContent>
+    </Card>
   );
 }

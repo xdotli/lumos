@@ -11,12 +11,18 @@ importers:
       '@ai-sdk/anthropic':
         specifier: ^0.0.34
         version: 0.0.34(zod@3.23.8)
+      '@ai-sdk/openai':
+        specifier: ^0.0.40
+        version: 0.0.40(zod@3.23.8)
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.3.3)(react@18.3.1)
       '@t3-oss/env-nextjs':
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.5.4)(zod@3.23.8)
+      '@tanstack/react-query':
+        specifier: ^5.51.18
+        version: 5.51.18(react@18.3.1)
       ai:
         specifier: ^3.2.45
         version: 3.2.45(react@18.3.1)(sswr@2.1.0(svelte@4.2.18))(svelte@4.2.18)(vue@3.4.35(typescript@5.5.4))(zod@3.23.8)
@@ -95,6 +101,12 @@ packages:
 
   '@ai-sdk/anthropic@0.0.34':
     resolution: {integrity: sha512-U3E2N+Y9WeqwMWyfyxwRBE5tw7RpLxkqxBWN+wFrpz8WDISUcLim0knqE52DWBcVH9W5MPxnoQzPN/nzBtDLXA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+
+  '@ai-sdk/openai@0.0.40':
+    resolution: {integrity: sha512-9Iq1UaBHA5ZzNv6j3govuKGXrbrjuWvZIgWNJv4xzXlDMHu9P9hnqlBr/Aiay54WwCuTVNhTzAUTfFgnTs2kbQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -362,6 +374,14 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@tanstack/query-core@5.51.17':
+    resolution: {integrity: sha512-AtVNOgVrZNz4C7RzMfx7sCn1/gf0Ype4nX8UP2BOh0C2tTMszwXk98iCLRacTn5vTRNJCZxz3fgEcTJq0uv8GQ==}
+
+  '@tanstack/react-query@5.51.18':
+    resolution: {integrity: sha512-l/PF3X6Coi53kEDpL2XEU0x+y3szOk/oKWSHMlyy8tyUHviaIg8tJ6O4Cc1AjLAhbyTG1a+bZobdSuLXzYTt/w==}
+    peerDependencies:
+      react: ^18.0.0
 
   '@types/diff-match-patch@1.0.36':
     resolution: {integrity: sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==}
@@ -2022,6 +2042,12 @@ snapshots:
       '@ai-sdk/provider-utils': 1.0.5(zod@3.23.8)
       zod: 3.23.8
 
+  '@ai-sdk/openai@0.0.40(zod@3.23.8)':
+    dependencies:
+      '@ai-sdk/provider': 0.0.14
+      '@ai-sdk/provider-utils': 1.0.5(zod@3.23.8)
+      zod: 3.23.8
+
   '@ai-sdk/provider-utils@1.0.5(zod@3.23.8)':
     dependencies:
       '@ai-sdk/provider': 0.0.14
@@ -2245,6 +2271,13 @@ snapshots:
       zod: 3.23.8
     optionalDependencies:
       typescript: 5.5.4
+
+  '@tanstack/query-core@5.51.17': {}
+
+  '@tanstack/react-query@5.51.18(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.51.17
+      react: 18.3.1
 
   '@types/diff-match-patch@1.0.36': {}
 

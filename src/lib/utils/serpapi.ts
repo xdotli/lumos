@@ -11,6 +11,7 @@ const serpApiResponseSchema = z.object({
 export async function getCompanyIRPage(ticker: string) {
   const response = await fetch(`https://serpapi.com/search?engine=google&q=${encodeURIComponent(`${ticker} investor relations events`)}&api_key=${process.env.SERP_API_KEY}`);
   const data = await response.json();
+  console.log(data);
   const parsedData = serpApiResponseSchema.parse(data);
   return parsedData.organic_results[0]?.link ?? '';
 }
