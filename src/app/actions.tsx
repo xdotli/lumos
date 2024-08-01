@@ -74,7 +74,7 @@ export async function getCompanyEvents(ticker: string) {
     });
   
     if (result && Array.isArray(result.object.events)) {
-      return result.object.events as Event[];
+      return { events: result.object.events as Event[], irPageUrl };
     } else {
       throw new Error('Unexpected result format from AI model');
     }

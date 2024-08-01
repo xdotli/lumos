@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import TokenLimitError from '@/components/token-limit-error';
+import { ExternalLink } from 'lucide-react';
 
 export const maxDuration = 60;
 
@@ -15,35 +16,58 @@ async function EventsTable({ ticker }: { ticker: string }) {
     return <TokenLimitError ticker={ticker} irPageUrl={result.irPageUrl} />;
   }
 
-  const events = Array.isArray(result) ? result : [];
+  const { events, irPageUrl } = Array.isArray(result.events) ? result : { events: [], irPageUrl: '' };
 
-  if (events.length === 0) {
+  if (!Array.isArray(events) || events.length === 0) {
     return <p>No events found.</p>;
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Event Name</TableHead>
-          <TableHead>Link</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Time</TableHead>
-          <TableHead>Event Type</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {events.map((event: Event, index: number) => (
-          <TableRow key={index}>
-            <TableCell>{event.eventName}</TableCell>
-            <TableCell><a href={event.link} target="_blank" rel="noopener noreferrer">Link</a></TableCell>
-            <TableCell>{event.date}</TableCell>
-            <TableCell>{event.time}</TableCell>
-            <TableCell>{event.eventType}</TableCell>
+    <div>
+      <div className="mb-4">
+        <a 
+          href={irPageUrl} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          Visit {ticker}&apos;s Investor Relations Page
+          <ExternalLink className="ml-1 h-4 w-4" />
+        </a>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Event Name</TableHead>
+            <TableHead>Link</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Time</TableHead>
+            <TableHead>Event Type</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {events.map((event: Event, index: number) => (
+            <TableRow key={index}>
+              <TableCell>{event.eventName}</TableCell>
+              <TableCell>
+                <a 
+                  href={event.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  Link
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
+              </TableCell>
+              <TableCell>{event.date}</TableCell>
+              <TableCell>{event.time}</TableCell>
+              <TableCell>{event.eventType}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
