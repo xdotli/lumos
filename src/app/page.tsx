@@ -8,7 +8,7 @@ import TokenLimitError from '@/components/token-limit-error';
 import { ExternalLink } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { ClientSideEventCalendar } from '@/components/client-side-event-calendar';
+import { ClientEventCalendar } from '@/components/client-side-event-calendar';
 
 
 export const maxDuration = 60;
@@ -75,32 +75,79 @@ function EventsTable({ ticker, events, irPageUrl }: EventsTableProps) {
   );
 }
 
-function EventCalendar({ events }: { events: Event[] }) {
-  const eventDates = events.map(event => new Date(event.date));
-  
+function EventCalendar({ events, selectedDate }: { events: Event[], selectedDate?: Date }) {
+  const selectedDateEvents = selectedDate
+    ? events.filter(event => format(new Date(event.date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd'))
+    : [];
+
   return (
     <Card className="mb-6">
       <CardHeader>
         <CardTitle>All Events Calendar</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Calendar
-          mode="multiple"
-          selected={eventDates}
-          className="rounded-md border"
-        />
+      <CardContent className="flex">
+        <div className="w-1/2">
+          {/* <ClientSideEventCalendar events={events} selectedDate={selectedDate} /> */}
+        </div>
+        <div className="w-1/2 pl-4">
+          {selectedDate && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">
+                Events on {format(selectedDate, 'MMMM d, yyyy')}:
+              </h3>
+              {selectedDateEvents.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Time</TableHead>
+                        <TableHead>Event</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Link</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedDateEvents.map((event, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{event.time}</TableCell>
+                          <TableCell>{event.eventName}</TableCell>
+                          <TableCell>{event.eventType}</TableCell>
+                          <TableCell>
+                            <a 
+                              href={event.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                              Link
+                            </a>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <p>No events on this date.</p>
+              )}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-async function EventsResults({ tickerInput, selectedDate }: { tickerInput: string, selectedDate?: Date }) {
+async function EventsResults({ tickerInput }: { tickerInput: string }) {
   const results = await getCompanyEvents(tickerInput);
-  const allEvents = results.flatMap(result => 'events' in result ? result.events : []).filter(event => event !== undefined) as Event[];
+  const allEvents = results.flatMap(result => 
+    'events' in result && result.events ? result.events.map(event => ({ ...event, ticker: result.ticker })) : []
+  ).filter(event => event !== undefined) as (Event & { ticker: string })[];
+
 
   return (
     <div className="space-y-6">
-      <EventCalendar events={allEvents} />
+      <ClientEventCalendar events={allEvents} />
       {results.map((result, index) => (
         <Card key={index}>
           <CardHeader>
@@ -124,12 +171,9 @@ async function EventsResults({ tickerInput, selectedDate }: { tickerInput: strin
 export default function InvestorRelationsApp({
   searchParams
 }: {
-  searchParams: {
-    date: string | number | Date; tickers?: string 
-}
+  searchParams: { tickers?: string }
 }) {
   const tickers = searchParams.tickers ?? '';
-  const selectedDate = searchParams.date ? new Date(searchParams.date) : undefined;
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-5xl">
@@ -154,7 +198,7 @@ export default function InvestorRelationsApp({
 
       {tickers && (
         <Suspense fallback={<p>The intelligent Lumosity agent is researching...</p>}>
-          <EventsResults tickerInput={tickers} selectedDate={selectedDate} />
+          <EventsResults tickerInput={tickers} />
         </Suspense>
       )}
     </div>
