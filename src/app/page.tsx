@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import TokenLimitError from '@/components/token-limit-error';
 
+export const maxDuration = 60;
+
 async function EventsTable({ ticker }: { ticker: string }) {
   const result = await getCompanyEvents(ticker);
 
