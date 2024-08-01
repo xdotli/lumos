@@ -3,7 +3,7 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
-import { getCompanyIRPage, fetchHTML } from '@/lib/utils/serpapi';
+import { getCompanyIRPage, fetchHTML, fetchRenderedHTML } from '@/lib/utils/serpapi';
 import { z } from 'zod';
 
 export interface Event {
