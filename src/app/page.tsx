@@ -1,20 +1,23 @@
 import { Suspense } from 'react';
-import { getCompanyEvents, type Event } from './actions';
+import { getCompanyEvents, type Event } from '@/app/actions';
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import TokenLimitError from '@/components/token-limit-error';
 
 async function EventsTable({ ticker }: { ticker: string }) {
-  const events = await getCompanyEvents(ticker);
+  const result = await getCompanyEvents(ticker);
+
+  if (!Array.isArray(result) && 'error' in result && result.error === 'TOKEN_LIMIT_EXCEEDED') {
+    return <TokenLimitError ticker={ticker} irPageUrl={result.irPageUrl} />;
+  }
+
+  const events = Array.isArray(result) ? result : [];
 
   if (events.length === 0) {
     return <p>No events found.</p>;
   }
-
-  // if (events) {
-  //   return JSON.stringify(events);
-  // }
 
   return (
     <Table>
