@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import TokenLimitError from '@/components/token-limit-error';
 import { ExternalLink } from 'lucide-react';
 
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 interface EventsTableProps {
   ticker: string;
