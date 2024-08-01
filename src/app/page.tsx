@@ -71,7 +71,7 @@ export default function InvestorRelationsApp({
         </form>
 
         {ticker && (
-          <Suspense fallback={<p>Loading...</p>}>
+          <Suspense fallback={<p>The intelligent Lumosity agent is researching...</p>}>
             <EventsTable ticker={ticker} />
           </Suspense>
         )}
