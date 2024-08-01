@@ -2,8 +2,8 @@
 
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
-import { generateObject } from 'ai';
-import { getCompanyIRPage, fetchHTML, fetchRenderedHTML } from '@/lib/utils/serpapi';
+import { generateObject, generateText } from 'ai';
+import { getCompanyIRPage, fetchHTML } from '@/lib/utils/serpapi';
 import { z } from 'zod';
 
 export interface Event {
@@ -24,7 +24,18 @@ const eventSchema = z.object({
   }))
 });
 
-export async function getCompanyEvents(ticker: string) {
+async function parseTickers(input: string): Promise<string[]> {
+  const { text } = await generateText({
+    model: openai('gpt-4o'),
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant that extracts stock tickers from text.' },
+      { role: 'user', content: `Extract all stock tickers from the following text. Return only a comma-separated list of tickers, nothing else: ${input}` }
+    ],
+  });
+  return text.split(',').map(ticker => ticker.trim());
+}
+
+async function getCompanyEventsForTicker(ticker: string) {
   try {
     const irPageUrl = await getCompanyIRPage(ticker);
     const html = await fetchHTML(irPageUrl);
@@ -36,52 +47,30 @@ export async function getCompanyEvents(ticker: string) {
       messages: [
         { role: 'system', content: 'You are a helpful assistant that extracts event information from HTML.' },
         { role: 'user', content: `
-  You are gonna do the following:
-  1. Accepts an HTML object as input, similar to the one provided earlier containing information about Visa Inc.'s events.
-  2. Parses the HTML to extract information about each event.
-  3. Returns a JSON array of event objects, where each object contains the following fields:
-     - eventName: The name of the event
-     - link: The webcast or registration link for the event
-     - date: The date of the event in MM/DD/YYYY format
-     - time: The time of the event, including time zone
-     - eventType: The type of event (e.g., Conference, Conference Call, Annual Meeting)
-  You should be able to handle variations in the HTML structure and extract all relevant events listed.
-  Example of the expected JSON output format:
-  [
-    {
-      "eventName": "Q3 2024 Visa Earnings Conference Call",
-      "link": "https://events.q4inc.com/attendee/639311361",
-      "date": "07/23/2024",
-      "time": "5:00 PM EST",
-      "eventType": "Conference Call"
-    },
-    {
-      "eventName": "Baird Global Consumer, Technology & Services Conference",
-      "link": "https://wsw.com/webcast/baird72/register.aspx?conf=baird72&page=v&url=https://wsw.com/webcast/baird72/v/1456306",
-      "date": "06/05/2024",
-      "time": "9:40 AM EST",
-      "eventType": "Conference"
-    }
-  ]
-  
-  You should be robust enough to handle potential inconsistencies in the HTML structure and should extract all events present in the provided HTML.
-  You should strictly return JSON, and nothing else.
-  Here's the HTML to parse:
-  
-  ${html}
+Extract event information from this HTML, formatting it as a JSON object with an 'events' key containing an array of event objects. Each event object should have eventName, link, date, time (in Eastern Time), and eventType properties. Classify eventType as one of: Earnings Calls, Conference, Shareholder Meeting, or Other. 
+
+Here's the HTML:
+
+${html}
         ` },
       ],
     });
   
     if (result && Array.isArray(result.object.events)) {
-      return { events: result.object.events as Event[], irPageUrl };
+      return { ticker, events: result.object.events as Event[], irPageUrl };
     } else {
       throw new Error('Unexpected result format from AI model');
     }
   } catch (error) {
     if (error instanceof Error && error.message.includes('maximum context length')) {
-      return { error: 'TOKEN_LIMIT_EXCEEDED', irPageUrl: await getCompanyIRPage(ticker) };
+      return { ticker, error: 'TOKEN_LIMIT_EXCEEDED', irPageUrl: await getCompanyIRPage(ticker) };
     }
-    throw error;
+    return { ticker, error: error instanceof Error ? error.message : 'Unknown error', irPageUrl: '' };
   }
+}
+
+export async function getCompanyEvents(tickerInput: string) {
+  const tickers = await parseTickers(tickerInput);
+  const results = await Promise.all(tickers.map(getCompanyEventsForTicker));
+  return results;
 }

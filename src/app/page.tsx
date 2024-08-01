@@ -7,19 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import TokenLimitError from '@/components/token-limit-error';
 import { ExternalLink } from 'lucide-react';
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
-async function EventsTable({ ticker }: { ticker: string }) {
-  const result = await getCompanyEvents(ticker);
+interface EventsTableProps {
+  ticker: string;
+  events: Event[];
+  irPageUrl: string;
+}
 
-  if (!Array.isArray(result) && 'error' in result && result.error === 'TOKEN_LIMIT_EXCEEDED') {
-    return <TokenLimitError ticker={ticker} irPageUrl={result.irPageUrl} />;
-  }
-
-  const { events, irPageUrl } = Array.isArray(result.events) ? result : { events: [], irPageUrl: '' };
-
-  if (!Array.isArray(events) || events.length === 0) {
-    return <p>No events found.</p>;
+function EventsTable({ ticker, events, irPageUrl }: EventsTableProps) {
+  if (events.length === 0) {
+    return <p>No events found for {ticker}.</p>;
   }
 
   return (
@@ -71,37 +69,70 @@ async function EventsTable({ ticker }: { ticker: string }) {
   );
 }
 
+async function EventsCards({ tickerInput }: { tickerInput: string }) {
+  const results = await getCompanyEvents(tickerInput);
+
+  return (
+    <div className="space-y-6">
+      {results.map((result, index) => (
+        <Card key={index}>
+          <CardHeader>
+            <CardTitle>{result.ticker}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {result.error ? (
+              result.error === 'TOKEN_LIMIT_EXCEEDED' ? (
+                <TokenLimitError ticker={result.ticker} irPageUrl={result.irPageUrl} />
+              ) : (
+                <p>Error: {result.error}</p>
+              )
+            ) : (
+              result.events ? (
+                <EventsTable ticker={result.ticker} events={result.events} irPageUrl={result.irPageUrl} />
+              ) : (
+                <p>No events available</p>
+              )
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export default function InvestorRelationsApp({
   searchParams
 }: {
-  searchParams: { ticker?: string }
+  searchParams: { tickers?: string }
 }) {
-  const ticker = searchParams.ticker ?? '';
+  const tickers = searchParams.tickers ?? '';
 
   return (
-    <Card className="w-full max-w-4xl mx-auto mt-10">
-      <CardHeader>
-        <CardTitle>Investor Relations Webcasts Finder</CardTitle>
-        <CardDescription>Enter a ticker to find upcoming and past webcasts</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form action="/" className="flex space-x-2 mb-4">
-          <Input
-            type="text"
-            name="ticker"
-            defaultValue={ticker}
-            placeholder="Enter ticker (e.g., MSFT)"
-            className="flex-grow"
-          />
-          <Button type="submit">Search</Button>
-        </form>
+    <div className="container mx-auto py-10">
+      <Card className="mb-10">
+        <CardHeader>
+          <CardTitle>Investor Relations Webcasts Finder</CardTitle>
+          <CardDescription>Enter tickers to find upcoming and past webcasts</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action="/" className="flex space-x-2 mb-4">
+            <Input
+              type="text"
+              name="tickers"
+              defaultValue={tickers}
+              placeholder="Enter tickers (e.g., MSFT, AAPL, GOOGL)"
+              className="flex-grow"
+            />
+            <Button type="submit">Search</Button>
+          </form>
+        </CardContent>
+      </Card>
 
-        {ticker && (
-          <Suspense fallback={<p>The intelligent Lumosity agent is researching...</p>}>
-            <EventsTable ticker={ticker} />
-          </Suspense>
-        )}
-      </CardContent>
-    </Card>
+      {tickers && (
+        <Suspense fallback={<p>The intelligent Lumosity agent is researching...</p>}>
+          <EventsCards tickerInput={tickers} />
+        </Suspense>
+      )}
+    </div>
   );
 }
