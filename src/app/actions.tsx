@@ -6,6 +6,8 @@ import { generateObject } from 'ai';
 import { getCompanyIRPage, fetchHTML, fetchRenderedHTML } from '@/lib/utils/serpapi';
 import { z } from 'zod';
 
+export const maxDuration = 60;
+
 export interface Event {
   eventName: string;
   link: string;
