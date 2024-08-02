@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { ClientEventCalendar } from '@/components/client-side-event-calendar';
 import { EventTypeTag } from '@/components/event-type-tag';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 interface EventsTableProps {
   ticker: string;
