@@ -9,7 +9,7 @@ type EventType =
   | "Other";
 
 const tagColors: Record<EventType, string> = {
-  "Earnings Calls": "bg-red-100 text-red-800",
+  "Earnings Calls": "bg-blue-100 text-blue-800",
   Conference: "bg-yellow-100 text-yellow-800",
   "Shareholder Meeting": "bg-teal-100 text-teal-800",
   Other: "bg-pink-100 text-pink-800",
