@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { Button } from "@/components/ui/button"
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Error({
   error,
@@ -15,8 +15,8 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h2 className="text-2xl font-bold mb-4">Something went wrong!</h2>
+    <div className="flex h-screen flex-col items-center justify-center">
+      <h2 className="mb-4 text-2xl font-bold">Something went wrong!</h2>
       <Button onClick={() => reset()}>Try again</Button>
     </div>
   );
