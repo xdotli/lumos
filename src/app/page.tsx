@@ -8,9 +8,13 @@ import TokenLimitError from '@/components/token-limit-error';
 import { ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { ClientEventCalendar } from '@/components/client-side-event-calendar';
-import { EventTypeTag } from '@/components/event-type-tag';
+import dynamic from 'next/dynamic';
 
 export const maxDuration = 300;
+
+const EventTypeTag = dynamic(() => import('@/components/event-type-tag').then(mod => mod.EventTypeTag), {
+  ssr: false
+});
 
 interface EventsTableProps {
   ticker: string;

@@ -18,7 +18,10 @@ import { EventTypeTag } from "@/components/event-type-tag";
 export function ClientEventCalendar({ events }: { events: Event[] }) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  const eventDates = events.map((event) => new Date(event.date));
+  const eventDates = events.map((event) => new Date(event.date + 'T00:00:00'));
+
+  const eventDatesSet = new Set(events.map(event => format(new Date(event.date), "yyyy-MM-dd")));
+
 
   const selectedDateEvents = selectedDate
     ? events.filter(
@@ -39,12 +42,11 @@ export function ClientEventCalendar({ events }: { events: Event[] }) {
             onSelect={setSelectedDate}
             className="rounded-md border"
             modifiers={{
-              hasEvent: (date: any) =>
-                eventDates.some(
-                  (eventDate) =>
-                    format(eventDate, "yyyy-MM-dd") ===
-                    format(date, "yyyy-MM-dd"),
-                ),
+              hasEvent: (date) => eventDates.some(eventDate => 
+                eventDate.getUTCFullYear() === date.getUTCFullYear() &&
+                eventDate.getUTCMonth() === date.getUTCMonth() &&
+                eventDate.getUTCDate() === date.getUTCDate()
+              )
             }}
             modifiersStyles={{
               hasEvent: { fontWeight: "bold", textDecoration: "underline" },

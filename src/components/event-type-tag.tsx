@@ -5,10 +5,10 @@ import React from 'react';
 type EventType = 'Earnings Calls' | 'Conference' | 'Shareholder Meeting' | 'Other';
 
 const tagColors: Record<EventType, string> = {
-  'Earnings Calls': 'bg-blue-100 text-blue-800',
-  'Conference': 'bg-green-100 text-green-800',
-  'Shareholder Meeting': 'bg-purple-100 text-purple-800',
-  'Other': 'bg-gray-100 text-gray-800'
+  'Earnings Calls': 'bg-red-100 text-red-800',
+  'Conference': 'bg-yellow-100 text-yellow-800',
+  'Shareholder Meeting': 'bg-teal-100 text-teal-800',
+  'Other': 'bg-pink-100 text-pink-800'
 };
 
 export function EventTypeTag({ type }: { type: EventType }) {
