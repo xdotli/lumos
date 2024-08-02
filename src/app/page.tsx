@@ -6,10 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import TokenLimitError from '@/components/token-limit-error';
 import { ExternalLink } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ClientEventCalendar } from '@/components/client-side-event-calendar';
-
+import { EventTypeTag } from '@/components/event-type-tag';
 
 export const maxDuration = 60;
 
@@ -107,20 +106,24 @@ function EventCalendar({ events, selectedDate }: { events: Event[], selectedDate
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {selectedDateEvents.map((event, index) => (
+                      {events.map((event: Event, index: number) => (
                         <TableRow key={index}>
-                          <TableCell>{event.time}</TableCell>
-                          <TableCell>{event.eventName}</TableCell>
-                          <TableCell>{event.eventType}</TableCell>
+                          <TableCell className="break-words">{event.eventName}</TableCell>
                           <TableCell>
                             <a 
                               href={event.link} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                              className="flex items-center text-blue-600 hover:text-blue-800 hover:underline"
                             >
                               Link
+                              <ExternalLink className="ml-1 h-4 w-4" />
                             </a>
+                          </TableCell>
+                          <TableCell>{event.date}</TableCell>
+                          <TableCell>{event.time}</TableCell>
+                          <TableCell>
+                            <EventTypeTag type={event.eventType} />
                           </TableCell>
                         </TableRow>
                       ))}
